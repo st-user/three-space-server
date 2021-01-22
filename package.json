@@ -1,0 +1,23 @@
+{
+  "name": "three-space-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "lint:c": "eslint 'components/**/*.js'",
+    "lint:s": "eslint 'server.js'"
+  },
+  "author": "Tomoki Sato",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.15.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "log4js": "^6.3.0",
+    "ws": "^7.4.2"
+  }
+}
