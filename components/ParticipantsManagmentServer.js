@@ -40,8 +40,8 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
 
     onSignalingMessage(server, ws, messageObj) {
 
-        const fromClientId = messageObj.fromClientId;
-        const toClientId = messageObj.toClientId;
+        const fromClientId = messageObj.from;
+        const toClientId = messageObj.to;
 
         const spaceIdentifier = participantsManager.getSpaceIdentifier(fromClientId);
         const clients = this.clientsBySpaceIdentifier.get(spaceIdentifier);

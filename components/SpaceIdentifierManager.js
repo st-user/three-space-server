@@ -4,14 +4,6 @@ module.exports = class SpaceIdentifierManager {
 
     constructor() {
         this.availableSpaceIdentifiers = new Map();
-
-        /* For Test */
-        const exp = new Date();
-        exp.setMonth(exp.setMonth() + 1);
-        this.availableSpaceIdentifiers.set('1234567890', {
-            expiration: exp
-        });
-
     }
 
     canAccept(spaceIdentifier) {

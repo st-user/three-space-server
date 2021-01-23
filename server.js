@@ -4,7 +4,7 @@ const { routing, websocketServerRouting } = require('./components/ApplicationRou
 const { systemLogger, handleErrorQuietly } = require('./components/Logger.js');
 
 /* Server Port */
-const PORT = 3000;
+const PORT = 3333;
 
 /* express */
 const app = express();
@@ -50,3 +50,8 @@ httpServer.on('upgrade', (request, socket, head) => {
     }
 
 });
+
+module.exports = {
+    app,
+    express
+};
