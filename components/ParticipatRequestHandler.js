@@ -1,3 +1,5 @@
+'use strict';
+
 const RequestHandler = require('./RequestHandler.js');
 const { systemLogger } = require('./Logger.js');
 const { spaceIdentifierManager, clientTokenManager, participantsManager } = require('./ApplicationComponents.js');

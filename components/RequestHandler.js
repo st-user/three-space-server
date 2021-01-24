@@ -1,3 +1,5 @@
+'use strict';
+
 const { systemLogger, handleErrorQuietly } = require('./Logger.js');
 
 module.exports = class RequestHandler {

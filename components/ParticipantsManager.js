@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = class ParticipantsManager {
 
     whitespaceRegExp = /^\s+$/;
@@ -16,7 +18,8 @@ module.exports = class ParticipantsManager {
     generateClient(spaceIdentifier, name) {
         // この段階で不正な値の場合、正常な画面操作で生成されたリクエストではない
         if (!name || this.whitespaceRegExp.test(name)
-                || this.charRegExp.test(name)) {
+                || this.charRegExp.test(name)
+                || 10 < name.length) {
             return undefined;
         }
         const clientId = this.idGenerator.generate();

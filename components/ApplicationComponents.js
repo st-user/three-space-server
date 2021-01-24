@@ -1,3 +1,5 @@
+'use strict';
+
 const ClientIdGenerator = require('./ClientIdGenerator.js');
 const ClientTokenManager = require('./ClientTokenManager.js');
 const ParticipantsManager = require('./ParticipantsManager.js');

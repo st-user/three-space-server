@@ -1,3 +1,5 @@
+'use strict';
+
 const { app, express } = require('./server.js');
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 

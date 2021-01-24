@@ -1,3 +1,5 @@
+'use strict';
+
 const WebSocket = require('ws');
 const { systemLogger, handleErrorQuietly } = require('./Logger.js');
 

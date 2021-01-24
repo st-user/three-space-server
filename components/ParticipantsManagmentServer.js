@@ -1,3 +1,5 @@
+'use strict';
+
 const WebSocket = require('ws');
 const WebSocketServerWrapper = require('./WebSocketServerWrapper.js');
 const { clientTokenManager, participantsManager, spaceIdentifierManager } = require('./ApplicationComponents.js');

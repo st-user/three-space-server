@@ -1,3 +1,5 @@
+'use strict';
+
 const ParticipantsManagmentServer = require('./ParticipantsManagmentServer.js');
 const ParticipatRequestHandler = require('./ParticipatRequestHandler.js');
 const { systemLogger } = require('./Logger.js');

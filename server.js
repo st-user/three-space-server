@@ -1,4 +1,7 @@
+'use strict';
+
 const express = require('express');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { routing, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger, handleErrorQuietly } = require('./components/Logger.js');
@@ -9,7 +12,7 @@ const PORT = 3333;
 /* express */
 const app = express();
 app.use(bodyParser.json());
-
+app.use(helmet());
 const httpServer = app.listen(PORT, () => {
     systemLogger.info(`Start listening on ${PORT}`);
 });

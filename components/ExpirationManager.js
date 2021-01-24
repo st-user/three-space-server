@@ -1,3 +1,5 @@
+'use strict';
+
 const CHECK_EXPIRATION_INTERVAL = 1000 * 60;
 const { systemLogger } = require('./Logger.js');
 

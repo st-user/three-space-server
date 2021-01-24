@@ -1,3 +1,5 @@
+'use strict';
+
 const crypto = require('crypto');
 
 const EXPIRES_IN_MINUTES = 15;
