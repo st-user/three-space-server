@@ -3,7 +3,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const { routing, websocketServerRouting } = require('./components/ApplicationRoutings.js');
+const { postRouting, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger } = require('./components/Logger.js');
 
 /* Server Port */
@@ -21,7 +21,7 @@ const httpServer = app.listen(PORT, () => {
 });
 app.set('trust proxy', 'loopback');
 
-routing.forEach((compoment, path) => {
+postRouting.forEach((compoment, path) => {
 
     app.post(path, (req, res) => {
 
