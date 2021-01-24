@@ -4,10 +4,13 @@ const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { routing, websocketServerRouting } = require('./components/ApplicationRoutings.js');
-const { systemLogger, handleErrorQuietly } = require('./components/Logger.js');
+const { systemLogger } = require('./components/Logger.js');
 
 /* Server Port */
 const PORT = 3333;
+
+/* NODE_ENV */
+systemLogger.info(`NODE_ENV is ${process.env.NODE_ENV}`);
 
 /* express */
 const app = express();
@@ -49,7 +52,9 @@ httpServer.on('upgrade', (request, socket, head) => {
         serverWrapper.onDoUpgrade(request, socket, head, url);
 
     } catch(e) {
-        handleErrorQuietly(e, () => socket.destroy());
+        systemLogger.error('Uncaught exception on upgrade', e);
+        socket.destroy();
+        throw e;
     }
 
 });

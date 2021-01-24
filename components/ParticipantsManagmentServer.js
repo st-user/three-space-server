@@ -61,7 +61,7 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
     }
 
     _startManagingConnection() {
-
+        // TODO 予期せぬ例外時に処理を継続すべきか精査
         const manage = () => {
 
             if (this.clientsBySpaceIdentifier.size === 0) {

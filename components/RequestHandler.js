@@ -1,6 +1,6 @@
 'use strict';
 
-const { systemLogger, handleErrorQuietly } = require('./Logger.js');
+const { systemLogger } = require('./Logger.js');
 
 module.exports = class RequestHandler {
 
@@ -9,9 +9,8 @@ module.exports = class RequestHandler {
             systemLogger.info(`Request : ${req.path}`);
             this.handle(req, res, requestContext);
         } catch (e) {
-            handleErrorQuietly(e, () => {
-                res.status(500).send({ error: 'internal server error.' });
-            });
+            systemLogger.error('Uncaught exception on RequestHandler', e);
+            throw e;
         }
     }
 

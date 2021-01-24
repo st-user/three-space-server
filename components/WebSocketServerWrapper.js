@@ -1,7 +1,7 @@
 'use strict';
 
 const WebSocket = require('ws');
-const { systemLogger, handleErrorQuietly } = require('./Logger.js');
+const { systemLogger } = require('./Logger.js');
 
 
 module.exports = class WebSocketServerWrapper {
@@ -54,13 +54,17 @@ module.exports = class WebSocketServerWrapper {
                         }
 
                     } catch(e) {
-                        handleErrorQuietly(e, () => ws.terminate());
+                        systemLogger.error('Uncaught exception on websocket.onmessage', e);
+                        ws.terminate();
+                        throw e;
                     }
                 });
                 this.onConnection(this.websocketServer, ws);
 
             } catch(e) {
-                handleErrorQuietly(e, () => ws.terminate());
+                systemLogger.error('Uncaught exception on websocket.onmessage', e);
+                ws.terminate();
+                throw e;
             }
         });
     }
