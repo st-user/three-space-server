@@ -6,6 +6,7 @@ const { clientTokenManager, participantsManager, spaceIdentifierManager } = requ
 const { systemLogger } = require('./Logger.js');
 
 const CLIENT_HEALTH_CHECK_INTERVAL_MILLIS = 3000;
+const CONNECTION_PING_PONG_INTERVAL_MILLIS = 10000;
 
 module.exports = class ParticipantsManagmentServer extends WebSocketServerWrapper {
 
@@ -34,6 +35,9 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
     }
 
     onMessage(server, ws, messageObj) {
+        if (messageObj.cmd === 'pong') {
+            return;
+        }
         if (messageObj.cmd === 'requestParticipantsManagement') {
             this._onRequestParticipantsManagement(messageObj, ws);
             return;
@@ -123,6 +127,18 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
             setTimeout(manage, CLIENT_HEALTH_CHECK_INTERVAL_MILLIS);
         };
         manage();
+
+        const ping = () => {
+            this.clientsBySpaceIdentifier.forEach(sockClients => {
+                sockClients.forEach(sockClient => {
+                    if (sockClient.readyState === WebSocket.OPEN) {
+                        sockClient.send(JSON.stringify({ cmd: 'ping' }));
+                    }
+                });
+            });
+            setTimeout(ping, CONNECTION_PING_PONG_INTERVAL_MILLIS);
+        };
+        setTimeout(ping, CONNECTION_PING_PONG_INTERVAL_MILLIS);
     }
 
     _onRequestParticipantsManagement(messageObj, ws) {

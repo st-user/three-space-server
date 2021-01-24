@@ -10,3 +10,6 @@ exp.setMonth(exp.setMonth() + 1);
 spaceIdentifierManager.availableSpaceIdentifiers.set('1234567890', {
     expiration: exp
 });
+spaceIdentifierManager.availableSpaceIdentifiers.set('2234567890', {
+    expiration: exp
+});
