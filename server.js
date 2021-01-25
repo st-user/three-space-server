@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
@@ -7,7 +8,7 @@ const { postRouting, websocketServerRouting } = require('./components/Applicatio
 const { systemLogger } = require('./components/Logger.js');
 
 /* Server Port */
-const PORT = 3333;
+const PORT = process.env.PORT;
 
 /* NODE_ENV */
 systemLogger.info(`NODE_ENV is ${process.env.NODE_ENV}`);

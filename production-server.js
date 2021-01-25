@@ -5,8 +5,16 @@ const { spaceIdentifierManager } = require('./components/ApplicationComponents.j
 
 app.use('/three-space', express.static('./dist/three-space'));
 
+
+const spaceIdentifieres = process.env.SPACE_IDENTIFIER.split(',');
+
 const exp = new Date();
-exp.setMonth(exp.setMonth() + 1);
-spaceIdentifierManager.availableSpaceIdentifiers.set('', {
-    expiration: exp
+exp.setHours(exp.getHours() + 6);
+
+spaceIdentifieres.forEach(spaceIdentifier => {
+    if (spaceIdentifier && 10 <= spaceIdentifier.length) {
+        spaceIdentifierManager.availableSpaceIdentifiers.set(spaceIdentifier, {
+            expiration: exp
+        });
+    }
 });
