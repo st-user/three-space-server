@@ -16,6 +16,15 @@ systemLogger.info(`NODE_ENV is ${process.env.NODE_ENV}`);
 const app = express();
 app.use(bodyParser.json());
 app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            'connect-src': ['\'self\' blob:'],
+        },
+    })
+);
+
 const httpServer = app.listen(PORT, () => {
     systemLogger.info(`Start listening on ${PORT}`);
 });
