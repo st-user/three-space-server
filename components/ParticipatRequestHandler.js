@@ -13,6 +13,7 @@ module.exports = class ParticipatRequestHandler extends RequestHandler {
         const spaceIdentifier = bodyJson.spaceIdentifier;
 
         if (!spaceIdentifierManager.canAccept(spaceIdentifier)) {
+            systemLogger.error('Unavailable spaceIdentifier (expired, mistaken or maybe malicious).');
             res.status(401).json({
                 message: '参加キーが無効です'
             });

@@ -42,7 +42,7 @@ module.exports = class ClientTokenManager {
     checkExpiration(now) {
         const expired = [];
         this.tokensByClientId.forEach((tokens, clientId) => {
-            if (!tokens.pmToken || !tokens.expiration || tokens.expiration < now) {
+            if (!tokens.expiration || tokens.expiration < now) {
                 expired.push(clientId);
             }
         });
