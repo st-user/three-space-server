@@ -1,25 +1,39 @@
 'use strict';
 
+const { verify } = require('./KeyVerifier.js');
+
 module.exports = class SpaceIdentifierManager {
 
-    availableSpaceIdentifiers;
+    //このフィールドに格納されている値はcrpto.scryptでhash化されたものである
+    availableSpaceIdentifierHashes;
 
     constructor() {
-        this.availableSpaceIdentifiers = new Map();
+        this.availableSpaceIdentifierHashes = new Map();
     }
 
-    canAccept(spaceIdentifier) {
-        return this.availableSpaceIdentifiers.has(spaceIdentifier);
+    contains(hash) {
+        return this.availableSpaceIdentifierHashes.has(hash);
+    }
+
+    async canAccept(spaceIdentifier) {
+
+        for (const spaceIdentifierHash of this.availableSpaceIdentifierHashes.keys()) {
+            const ret = await verify(spaceIdentifier, spaceIdentifierHash);
+            if (ret) {
+                return spaceIdentifierHash;
+            }
+        }
+        return undefined;
     }
 
     checkExpiration(now) {
         const expired = [];
-        this.availableSpaceIdentifiers.forEach((data, spaceIdentifier) => {
+        this.availableSpaceIdentifierHashes.forEach((data, spaceIdentifierHash) => {
             if (!data.expiration || data.expiration < now) {
-                expired.push(spaceIdentifier);
+                expired.push(spaceIdentifierHash);
             }
         });
-        expired.forEach(idn => this.availableSpaceIdentifiers.delete(idn));
+        expired.forEach(hash => this.availableSpaceIdentifierHashes.delete(hash));
         return expired;
     }
 };

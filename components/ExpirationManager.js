@@ -21,7 +21,7 @@ module.exports = class ExpirationManager {
 
             const now = new Date();
             const expired = this.spaceIdentifierManager.checkExpiration(now);
-            this.participantsManager.deleteBySpaceIdentifiers(expired);
+            this.participantsManager.deleteBySpaceIdentifierHashes(expired);
 
             const expiredTokens = this.clientTokenManager.checkExpiration(now);
 

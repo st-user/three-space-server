@@ -6,14 +6,14 @@ const { spaceIdentifierManager } = require('./components/ApplicationComponents.j
 app.use('/three-space', express.static('./dist/three-space'));
 
 
-const spaceIdentifieres = process.env.SPACE_IDENTIFIER.split(',');
+const spaceIdentifierHashes = process.env.SPACE_IDENTIFIER_HASHES.split(',');
 
 const exp = new Date();
 exp.setHours(exp.getHours() + 6);
 
-spaceIdentifieres.forEach(spaceIdentifier => {
-    if (spaceIdentifier && 10 <= spaceIdentifier.length) {
-        spaceIdentifierManager.availableSpaceIdentifiers.set(spaceIdentifier, {
+spaceIdentifierHashes.forEach(spaceIdentifierHash=> {
+    if (spaceIdentifierHash) {
+        spaceIdentifierManager.availableSpaceIdentifierHashes.set(spaceIdentifierHash, {
             expiration: exp
         });
     }

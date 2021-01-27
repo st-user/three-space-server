@@ -6,13 +6,14 @@ const { spaceIdentifierManager, clientTokenManager, participantsManager } = requ
 
 module.exports = class ParticipatRequestHandler extends RequestHandler {
 
-    handle(req, res) {
+    async handle(req, res) {
 
         const bodyJson = req.body;
         const myName = bodyJson.myName;
         const spaceIdentifier = bodyJson.spaceIdentifier;
 
-        if (!spaceIdentifierManager.canAccept(spaceIdentifier)) {
+        const spaceIdentifierHash = await spaceIdentifierManager.canAccept(spaceIdentifier);
+        if (!spaceIdentifierHash) {
             systemLogger.error('Unavailable spaceIdentifier (expired, mistaken or maybe malicious).');
             res.status(401).json({
                 message: '参加キーが無効です'
@@ -21,7 +22,7 @@ module.exports = class ParticipatRequestHandler extends RequestHandler {
         }
 
         const newClientId = participantsManager.generateClient(
-            spaceIdentifier, myName
+            spaceIdentifierHash, myName
         );
 
         if (!newClientId) {
@@ -31,7 +32,7 @@ module.exports = class ParticipatRequestHandler extends RequestHandler {
         }
 
         const theOtherClients = participantsManager.getTheOthers(
-            spaceIdentifier, newClientId
+            spaceIdentifierHash, newClientId
         );
 
         const tokens = clientTokenManager.generateToken(newClientId);

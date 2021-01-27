@@ -7,15 +7,15 @@ module.exports = class ParticipantsManager {
 
     idGenerator;
     participantsBySpace;
-    spaceIdentifierByClientId;
+    spaceIdentifierHashByClientId;
 
     constructor(idGenerator) {
         this.idGenerator = idGenerator;
         this.participantsBySpace = new Map();
-        this.spaceIdentifierByClientId = new Map();
+        this.spaceIdentifierHashByClientId = new Map();
     }
 
-    generateClient(spaceIdentifier, name) {
+    generateClient(spaceIdentifierHash, name) {
         // この段階で不正な値の場合、正常な画面操作で生成されたリクエストではない
         if (!name || this.whitespaceRegExp.test(name)
                 || this.charRegExp.test(name)
@@ -23,58 +23,58 @@ module.exports = class ParticipantsManager {
             return undefined;
         }
         const clientId = this.idGenerator.generate();
-        const participantByClientId = this._compute(spaceIdentifier);
+        const participantByClientId = this._compute(spaceIdentifierHash);
         participantByClientId.set(clientId, {
             clientId: clientId,
             name: name
         });
-        this.spaceIdentifierByClientId.set(clientId, spaceIdentifier);
+        this.spaceIdentifierHashByClientId.set(clientId, spaceIdentifierHash);
         return clientId;
     }
 
-    deleteClients(spaceIdentifier, clientIdsToRemove) {
-        const participantByClientId = this.participantsBySpace.get(spaceIdentifier);
+    deleteClients(spaceIdentifierHash, clientIdsToRemove) {
+        const participantByClientId = this.participantsBySpace.get(spaceIdentifierHash);
         if (!participantByClientId) {
             return;
         }
         clientIdsToRemove.forEach(clientId => {
             participantByClientId.delete(clientId);
-            this.spaceIdentifierByClientId.delete(clientId);
+            this.spaceIdentifierHashByClientId.delete(clientId);
         });
 
     }
 
-    deleteBySpaceIdentifiers(spaceIdentifiers) {
-        if (!spaceIdentifiers) {
+    deleteBySpaceIdentifierHashes(spaceIdentifierHashes) {
+        if (!spaceIdentifierHashes) {
             return;
         }
         const clientIdsToRemove = [];
-        this.spaceIdentifierByClientId.forEach((clientId, idn) => {
-            if (spaceIdentifiers.includes(idn)) {
+        this.spaceIdentifierHashByClientId.forEach((clientId, hash) => {
+            if (spaceIdentifierHashes.includes(hash)) {
                 clientIdsToRemove.push(clientId);
             }
         });
         clientIdsToRemove.forEach(clientId => {
-            this.spaceIdentifierByClientId.delete(clientId);
+            this.spaceIdentifierHashByClientId.delete(clientId);
         });
-        spaceIdentifiers.forEach(idn => {
-            this.participantsBySpace.delete(idn);
+        spaceIdentifierHashes.forEach(hash => {
+            this.participantsBySpace.delete(hash);
         });
     }
 
-    getSpaceIdentifier(clientId) {
-        return this.spaceIdentifierByClientId.get(clientId);
+    getSpaceIdentifierHash(clientId) {
+        return this.spaceIdentifierHashByClientId.get(clientId);
     }
 
-    getTheOthers(spaceIdentifier, myClientId) {
+    getTheOthers(spaceIdentifierHash, myClientId) {
         return this.getClients(
-            spaceIdentifier, client => client.clientId !== myClientId
+            spaceIdentifierHash, client => client.clientId !== myClientId
         );
     }
 
-    getClients(spaceIdentifier, filter) {
+    getClients(spaceIdentifierHash, filter) {
         const participantByClientId = this.participantsBySpace.get(
-            spaceIdentifier
+            spaceIdentifierHash
         );
         if (!participantByClientId) {
             return [];
@@ -89,18 +89,18 @@ module.exports = class ParticipantsManager {
     }
 
     forEachClientIdsBySpace(handler) {
-        this.participantsBySpace.forEach((ps, spaceIdentifier) => {
-            handler(spaceIdentifier, Array.from(ps.keys()));
+        this.participantsBySpace.forEach((ps, spaceIdentifierHash) => {
+            handler(spaceIdentifierHash, Array.from(ps.keys()));
         });
     }
 
-    _compute(spaceIdentifier) {
+    _compute(spaceIdentifierHash) {
         let participants = this.participantsBySpace.get(
-            spaceIdentifier
+            spaceIdentifierHash
         );
         if (!participants) {
             participants = new Map();
-            this.participantsBySpace.set(spaceIdentifier, participants);
+            this.participantsBySpace.set(spaceIdentifierHash, participants);
 
         }
         return participants;

@@ -33,9 +33,9 @@ app.set('trust proxy', 'loopback');
 
 postRouting.forEach((compoment, path) => {
 
-    app.post(path, (req, res) => {
+    app.post(path, async (req, res) => {
 
-        compoment.doHandle(req, res);
+        await compoment.doHandle(req, res);
 
     });
 });

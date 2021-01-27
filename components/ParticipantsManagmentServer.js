@@ -10,11 +10,11 @@ const CONNECTION_PING_PONG_INTERVAL_MILLIS = 10000;
 
 module.exports = class ParticipantsManagmentServer extends WebSocketServerWrapper {
 
-    clientsBySpaceIdentifier;
+    sockClientsBySpaceIdentifierHash;
 
     constructor() {
         super();
-        this.clientsBySpaceIdentifier = new Map();
+        this.sockClientsBySpaceIdentifierHash = new Map();
     }
 
     init() {
@@ -49,8 +49,8 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
         const fromClientId = messageObj.from;
         const toClientId = messageObj.to;
 
-        const spaceIdentifier = participantsManager.getSpaceIdentifier(fromClientId);
-        const clients = this.clientsBySpaceIdentifier.get(spaceIdentifier);
+        const spaceIdentifierHash = participantsManager.getSpaceIdentifierHash(fromClientId);
+        const clients = this.sockClientsBySpaceIdentifierHash.get(spaceIdentifierHash);
 
         if (!clients) {
             return;
@@ -68,25 +68,25 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
         // TODO 予期せぬ例外時に処理を継続すべきか精査
         const manage = () => {
 
-            if (this.clientsBySpaceIdentifier.size === 0) {
+            if (this.sockClientsBySpaceIdentifierHash.size === 0) {
                 setTimeout(manage, CLIENT_HEALTH_CHECK_INTERVAL_MILLIS);
                 return;
             }
 
             // spaceIdentifierが存在しない=spaceIdentifierが期限切れ
-            const maybeExpiredSpaceIdentifiers = [];
-            this.clientsBySpaceIdentifier.forEach((sockClients, spaceIdentifier) => {
-                if (!spaceIdentifierManager.canAccept(spaceIdentifier)) {
-                    maybeExpiredSpaceIdentifiers.push(spaceIdentifier);
+            const maybeExpiredSpaceIdentifierHashes = [];
+            this.sockClientsBySpaceIdentifierHash.forEach((sockClients, spaceIdentifierHash) => {
+                if (!spaceIdentifierManager.contains(spaceIdentifierHash)) {
+                    maybeExpiredSpaceIdentifierHashes.push(spaceIdentifierHash);
                     sockClients.forEach(client => client.terminate());
                 }
             });
-            maybeExpiredSpaceIdentifiers.forEach(idn => this.clientsBySpaceIdentifier.delete(idn));
+            maybeExpiredSpaceIdentifierHashes.forEach(hash => this.sockClientsBySpaceIdentifierHash.delete(hash));
 
             let refleshedSpaceCount = 0;
-            participantsManager.forEachClientIdsBySpace(spaceIdentifier => {
+            participantsManager.forEachClientIdsBySpace(spaceIdentifierHash => {
 
-                const sockClients = this.clientsBySpaceIdentifier.get(spaceIdentifier);
+                const sockClients = this.sockClientsBySpaceIdentifierHash.get(spaceIdentifierHash);
                 if (!sockClients || sockClients.length === 0) {
                     return;
                 }
@@ -104,9 +104,9 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                     sockClients.delete(clientIdToRomove);
                 });
 
-                participantsManager.deleteClients(spaceIdentifier, notAvailableClientIds);
+                participantsManager.deleteClients(spaceIdentifierHash, notAvailableClientIds);
 
-                const allClients = participantsManager.getClients(spaceIdentifier);
+                const allClients = participantsManager.getClients(spaceIdentifierHash);
 
                 sockClients.forEach((client, clientId) => {
                     if (client.readyState === WebSocket.OPEN) {
@@ -129,7 +129,7 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
         manage();
 
         const ping = () => {
-            this.clientsBySpaceIdentifier.forEach(sockClients => {
+            this.sockClientsBySpaceIdentifierHash.forEach(sockClients => {
                 sockClients.forEach(sockClient => {
                     if (sockClient.readyState === WebSocket.OPEN) {
                         sockClient.send(JSON.stringify({ cmd: 'ping' }));
@@ -145,13 +145,13 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
 
         const clientId = messageObj.clientId;
 
-        const spaceIdentifier = participantsManager.getSpaceIdentifier(clientId);
-        const allClients = participantsManager.getClients(spaceIdentifier);
+        const spaceIdentifierHash = participantsManager.getSpaceIdentifierHash(clientId);
+        const allClients = participantsManager.getClients(spaceIdentifierHash);
 
-        let clients = this.clientsBySpaceIdentifier.get(spaceIdentifier);
+        let clients = this.sockClientsBySpaceIdentifierHash.get(spaceIdentifierHash);
         if (!clients) {
             clients = new Map();
-            this.clientsBySpaceIdentifier.set(spaceIdentifier, clients);
+            this.sockClientsBySpaceIdentifierHash.set(spaceIdentifierHash, clients);
         }
         clients.forEach(client => {
             if (ws !== client && client.readyState === WebSocket.OPEN) {
