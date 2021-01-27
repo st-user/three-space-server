@@ -8,7 +8,7 @@ app.use('/three-space', express.static('../three-space/dist/three-space'));
 
 const exp = new Date();
 exp.setMonth(exp.getMonth() + 1);
-const testPasswords = ['1234567890', '2234567890'];
+const testPasswords = ['123abcABC', '223cdeCDE'];
 
 testPasswords.forEach(tp => {
     hash(tp).then(spaceIdentifierHash => {
