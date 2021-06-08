@@ -47,7 +47,7 @@ httpServer.on('upgrade', (request, socket, head) => {
     try {
         const url = new URL(
             request.url,
-            'http://example.com' // path以降を取り出したいだけなので、baseは適当でよい
+            'http://example.com'
         );
         const pathname = url.pathname;
         systemLogger.info(`Upgrade ${pathname}`);

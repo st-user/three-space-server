@@ -3,7 +3,7 @@
 const { app, express } = require('./server.js');
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 
-app.use('/three-space', express.static('./dist/three-space'));
+app.use('/', express.static('./dist'));
 
 
 const spaceIdentifierHashes = process.env.SPACE_IDENTIFIER_HASHES.split(',');

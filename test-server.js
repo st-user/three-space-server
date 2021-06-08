@@ -4,7 +4,7 @@ const { app, express } = require('./server.js');
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 const { hash } = require('./tools/keygen.js');
 
-app.use('/three-space', express.static('../three-space/dist/three-space'));
+app.use('/', express.static('./dist'));
 
 const exp = new Date();
 exp.setMonth(exp.getMonth() + 1);
