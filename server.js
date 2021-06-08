@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const jwt = require('express-jwt');
 const jwtAuthz = require('express-jwt-authz');
 const jwksRsa = require('jwks-rsa');
-const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
 const { postRouting, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger } = require('./components/Logger.js');
@@ -87,7 +87,7 @@ const checkScopes = jwtAuthz([ 'create:spaceIdentifier' ], {
 });
 
 app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
-    const spaceIdentifier = crypto.randomBytes(16).toString('hex');
+    const spaceIdentifier = uuidv4();
 
     const exp = new Date();
     exp.setHours(exp.getHours() + 1);

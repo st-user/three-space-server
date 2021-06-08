@@ -1,6 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
 const EXPIRES_IN_MINUTES = 15;
 module.exports = class ClientTokenManager {
@@ -51,8 +51,6 @@ module.exports = class ClientTokenManager {
     }
 
     _generateToken() {
-        const buff = crypto.randomBytes(8);
-        const hex = buff.toString('hex');
-        return hex;
+        return uuidv4();
     }
 };

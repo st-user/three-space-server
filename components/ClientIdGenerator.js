@@ -1,23 +1,11 @@
 'use strict';
 
-const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = class ClientIdGenerator {
 
-    idCounter;
-
-    constructor() {
-        this.idCounter = 0;
-    }
-
     generate() {
-        this.idCounter++;
-        return this._generateToken() + '_' + this.idCounter;
+        return uuidv4();
     }
 
-    _generateToken() {
-        const buff = crypto.randomBytes(8);
-        const hex = buff.toString('hex');
-        return hex;
-    }
 };

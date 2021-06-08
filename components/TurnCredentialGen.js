@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const SECRET = process.env.TURN_SECRET;
 const HOURS_TURN_CREDENTIAL_VALID = process.env.HOURS_TURN_CREDENTIAL_VALID;
 
-const generateTurnCredentials = name => {
+const generateTurnCredentials = (name) => {
 
     if (!SECRET || !HOURS_TURN_CREDENTIAL_VALID) {
         return undefined;

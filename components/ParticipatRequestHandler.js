@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('crypto');
+
 const RequestHandler = require('./RequestHandler.js');
 const { systemLogger } = require('./Logger.js');
 const { spaceIdentifierManager, clientTokenManager, participantsManager } = require('./ApplicationComponents.js');
@@ -40,7 +42,7 @@ module.exports = class ParticipatRequestHandler extends RequestHandler {
         );
 
         const tokens = clientTokenManager.generateToken(newClientId);
-        const turnCredentials = generateTurnCredentials(newClientId);
+        const turnCredentials = generateTurnCredentials(this._generateTempUserId());
 
         res.json({
             clientId: newClientId,
@@ -52,5 +54,11 @@ module.exports = class ParticipatRequestHandler extends RequestHandler {
                 turnCredentials: turnCredentials
             }
         });
+    }
+
+    _generateTempUserId() {
+        const buff = crypto.randomBytes(8);
+        const hex = buff.toString('hex');
+        return hex;
     }
 };
