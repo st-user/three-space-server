@@ -1,11 +1,18 @@
 'use strict';
 
 require('dotenv').config();
+
 const express = require('express');
 const helmet = require('helmet');
-const bodyParser = require('body-parser');
+const jwt = require('express-jwt');
+const jwtAuthz = require('express-jwt-authz');
+const jwksRsa = require('jwks-rsa');
+const crypto = require('crypto');
+
 const { postRouting, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger } = require('./components/Logger.js');
+const { hash } = require('./tools/keygen.js');
+const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 
 /* Server Port */
 const PORT = process.env.PORT;
@@ -15,13 +22,14 @@ systemLogger.info(`NODE_ENV is ${process.env.NODE_ENV}`);
 
 /* express */
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            'connect-src': ['\'self\' blob:'],
+            'connect-src': [`'self' blob: https://${process.env.AUTH0_DOMAIN}/`],
+            'frame-src': [ `https://${process.env.AUTH0_DOMAIN}/` ]
         },
     })
 );
@@ -39,6 +47,60 @@ postRouting.forEach((compoment, path) => {
 
     });
 });
+
+/* for endpoint that should be authenticated by auth0 */
+
+app.get('/auth_config', (req, res) => {
+    res.send({
+        domain: process.env.AUTH0_DOMAIN,
+        clientId: process.env.AUTH0_CLIENT_ID,
+        audience: process.env.AUTH0_AUDIENCE
+    });
+});
+
+app.use((err, req, res, next) => {
+
+    if (err.name === 'UnauthorizedError') {
+        return res.status(401).send({
+            msg: 'Invalid token'
+        });
+    }
+
+    next(err, req, res);
+});
+
+const checkJwt = jwt({
+    secret: jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestPerMinute: 5,
+        jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
+    }),
+
+    audience: process.env.AUTH0_AUDIENCE,
+    issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+    algorithms: ['RS256']
+});
+
+const checkScopes = jwtAuthz([ 'create:spaceIdentifier' ], {
+    customScopeKey: 'permissions'
+});
+
+app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
+    const spaceIdentifier = crypto.randomBytes(16).toString('hex');
+
+    const exp = new Date();
+    exp.setHours(exp.getHours() + 1);
+
+    hash(spaceIdentifier).then(spaceIdentifierHash => {
+        spaceIdentifierManager.availableSpaceIdentifierHashes.set(spaceIdentifierHash, {
+            expiration: exp
+        });
+        res.json({ spaceIdentifier });
+    });
+});
+
+
 
 /* websocket */
 // https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
