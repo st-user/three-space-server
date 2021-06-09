@@ -24,9 +24,14 @@ module.exports = class ParticipantsManager {
         }
         const clientId = this.idGenerator.generate();
         const participantByClientId = this._compute(spaceIdentifierHash);
+
+
+        const exp = new Date();
+        exp.setHours(exp.getHours() + 1);
         participantByClientId.set(clientId, {
             clientId: clientId,
-            name: name
+            name: name,
+            exp
         });
         this.spaceIdentifierHashByClientId.set(clientId, spaceIdentifierHash);
         return clientId;
@@ -86,6 +91,20 @@ module.exports = class ParticipantsManager {
             }
         });
         return ret;
+    }
+
+    getClient(spaceIdentifierHash, clientId) {
+        const participantByClientId = this.participantsBySpace.get(
+            spaceIdentifierHash
+        );
+        if (!participantByClientId) {
+            return;
+        }
+        return participantByClientId.get(clientId);
+    }
+
+    isTheClientAvailable(clientId) {
+        return this.spaceIdentifierHashByClientId.has(clientId);
     }
 
     forEachClientIdsBySpace(handler) {

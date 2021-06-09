@@ -39,6 +39,16 @@ module.exports = class ClientTokenManager {
         return token === inputValue;
     }
 
+    resetToken(clientId, tokenName) {
+        const tokens = this.tokensByClientId.get(clientId);
+        if (!tokens) {
+            return undefined;
+        }
+        const newToken = this._generateToken();
+        tokens[tokenName] = newToken;
+        return newToken;
+    }
+
     checkExpiration(now) {
         const expired = [];
         this.tokensByClientId.forEach((tokens, clientId) => {

@@ -26,6 +26,12 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
         const clientId = requestContext.params.clientId;
         const token = requestContext.params.token;
 
+        if (!participantsManager.isTheClientAvailable(clientId)) {
+            return {
+                log: `The client is not available ${clientId}.`
+            };            
+        }
+
         if (!clientTokenManager.check(clientId, 'pmToken', token)) {
             return {
                 log: `Maybe malicious pmToken ${token}.`
@@ -36,6 +42,10 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
 
     onMessage(server, ws, messageObj) {
         if (messageObj.cmd === 'pong') {
+            return;
+        }
+        if (messageObj.cmd === 'resetToken') {
+            this._resetToken(messageObj, ws);
             return;
         }
         if (messageObj.cmd === 'requestParticipantsManagement') {
@@ -94,21 +104,22 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                 sockClients.forEach((sockClient, clientId) => {
                     if (sockClient.readyState === WebSocket.CLOSING
                             || sockClient.readyState === WebSocket.CLOSED) {
-                        notAvailableClientIds.push(clientId);
+                       
+                        const clientInfo = participantsManager.getClient(spaceIdentifierHash, clientId);
+                        if (!clientInfo || clientInfo.exp < Date.now()) {
+                            notAvailableClientIds.push(clientId);
+                        }
                     }
                 });
-                if (notAvailableClientIds.length === 0) {
-                    return;
-                }
+
                 notAvailableClientIds.forEach(clientIdToRomove => {
                     sockClients.delete(clientIdToRomove);
                 });
-
                 participantsManager.deleteClients(spaceIdentifierHash, notAvailableClientIds);
 
                 const allClients = participantsManager.getClients(spaceIdentifierHash);
 
-                sockClients.forEach((client, clientId) => {
+                sockClients.forEach((client, clientId) => {                   
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({
                             cmd: 'refleshClients',
@@ -139,6 +150,17 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
             setTimeout(ping, CONNECTION_PING_PONG_INTERVAL_MILLIS);
         };
         setTimeout(ping, CONNECTION_PING_PONG_INTERVAL_MILLIS);
+    }
+
+    _resetToken(messageObj, ws) {
+        const newToken = clientTokenManager.resetToken(messageObj.clientId, 'pmToken');
+        if (!newToken) {
+            throw 'Token being reset is undefined.';
+        }
+        ws.send(JSON.stringify({
+            cmd: 'resetToken',
+            pmToken: newToken
+        }));
     }
 
     _onRequestParticipantsManagement(messageObj, ws) {
