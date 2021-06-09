@@ -84,13 +84,8 @@ const checkScopes = jwtAuthz([ 'create:spaceIdentifier' ], {
 app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
     const spaceIdentifier = uuidv4();
 
-    const exp = new Date();
-    exp.setHours(exp.getHours() + 3);
-
     hash(spaceIdentifier).then(spaceIdentifierHash => {
-        spaceIdentifierManager.availableSpaceIdentifierHashes.set(spaceIdentifierHash, {
-            expiration: exp
-        });
+        spaceIdentifierManager.setNew(spaceIdentifierHash);
         res.json({ spaceIdentifier });
     });
 });
@@ -135,7 +130,4 @@ httpServer.on('upgrade', (request, socket, head) => {
 
 });
 
-module.exports = {
-    app,
-    express
-};
+module.exports = { app };

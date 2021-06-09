@@ -1,5 +1,32 @@
 'use strict';
 
+const { CLIENT_INFO_TIMEOUT_COUNT } = require('./Environment.js');
+
+class Client {
+
+    clientId;
+    name;
+    consectiveDisconnectionsCount;
+
+    constructor(clientId, name) {
+        this.clientId = clientId;
+        this.name = name;
+        this.consectiveDisconnectionsCount = 0;
+    }
+
+    shoudlBeDeleted() {
+        return CLIENT_INFO_TIMEOUT_COUNT < this.consectiveDisconnectionsCount;
+    }
+
+    activate() {
+        this.consectiveDisconnectionsCount = 0;
+    }
+
+    markAsDisconnected() {
+        this.consectiveDisconnectionsCount++;
+    }
+}
+
 module.exports = class ParticipantsManager {
 
     whitespaceRegExp = /^\s+$/;
@@ -26,13 +53,7 @@ module.exports = class ParticipantsManager {
         const participantByClientId = this._compute(spaceIdentifierHash);
 
 
-        const exp = new Date();
-        exp.setHours(exp.getHours() + 3);
-        participantByClientId.set(clientId, {
-            clientId: clientId,
-            name: name,
-            exp
-        });
+        participantByClientId.set(clientId, new Client(clientId, name));
         this.spaceIdentifierHashByClientId.set(clientId, spaceIdentifierHash);
         return clientId;
     }

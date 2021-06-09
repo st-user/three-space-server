@@ -1,5 +1,8 @@
 'use strict';
 
+const { SPACE_IDENTIFIER_TIMEOUT_SECONDS } = require('./Environment.js');
+const SPACE_IDENTIFIER_TIMEOUT_MILLIS = SPACE_IDENTIFIER_TIMEOUT_SECONDS * 1000;
+
 const { verify } = require('./KeyVerifier.js');
 
 module.exports = class SpaceIdentifierManager {
@@ -29,11 +32,25 @@ module.exports = class SpaceIdentifierManager {
     checkExpiration(now) {
         const expired = [];
         this.availableSpaceIdentifierHashes.forEach((data, spaceIdentifierHash) => {
-            if (!data.expiration || data.expiration < now) {
+
+            const lastActiveTimestamp = data.lastActiveTimestamp;
+            if (!lastActiveTimestamp || SPACE_IDENTIFIER_TIMEOUT_MILLIS < (now - lastActiveTimestamp)) {
                 expired.push(spaceIdentifierHash);
             }
         });
         expired.forEach(hash => this.availableSpaceIdentifierHashes.delete(hash));
         return expired;
+    }
+
+    setNew(hash) {
+        this.availableSpaceIdentifierHashes.set(hash, {});
+        this.activate(hash);
+    }
+
+    activate(hash) {
+        const data = this.availableSpaceIdentifierHashes.get(hash);
+        if (data) {
+            data.lastActiveTimestamp = Date.now();
+        }
     }
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-const { STUN_URL, TURN_URL } = require('./components/Environment.js');
+const { STUN_URL, TURN_URL } = require('./Environment.js');
 
 const crypto = require('crypto');
 

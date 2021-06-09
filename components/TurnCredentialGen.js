@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const { 
     TURN_SECRET, 
     HOURS_TURN_CREDENTIAL_VALID
-} = require('./components/Environment.js');
+} = require('./Environment.js');
 
 const generateTurnCredentials = (name) => {
 

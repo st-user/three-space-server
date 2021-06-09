@@ -100,6 +100,7 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
             maybeExpiredSpaceIdentifierHashes.forEach(hash => this.sockClientsBySpaceIdentifierHash.delete(hash));
 
             let refleshedSpaceCount = 0;
+            let deactivedSpaceCount = 0;
             participantsManager.forEachClientIdsBySpace(spaceIdentifierHash => {
 
                 const sockClients = this.sockClientsBySpaceIdentifierHash.get(spaceIdentifierHash);
@@ -108,13 +109,21 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                 }
                 const notAvailableClientIds = [];
                 sockClients.forEach((sockClient, clientId) => {
+                    const clientInfo = participantsManager.getClient(spaceIdentifierHash, clientId);
+                    if (!clientInfo) {
+                        notAvailableClientIds.push(clientId);
+                        return;
+                    }
                     if (sockClient.readyState === WebSocket.CLOSING
                             || sockClient.readyState === WebSocket.CLOSED) {
                        
-                        const clientInfo = participantsManager.getClient(spaceIdentifierHash, clientId);
-                        if (!clientInfo || clientInfo.exp < Date.now()) {
+                        clientInfo.markAsDisconnected();
+
+                        if (clientInfo.shoudlBeDeleted()) {
                             notAvailableClientIds.push(clientId);
                         }
+                    } else {
+                        clientInfo.activate();
                     }
                 });
 
@@ -124,7 +133,6 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                 participantsManager.deleteClients(spaceIdentifierHash, notAvailableClientIds);
 
                 const allClients = participantsManager.getClients(spaceIdentifierHash);
-
                 sockClients.forEach((client, clientId) => {                   
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({
@@ -134,13 +142,26 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                         }));
                     }
                 });
+
                 if (0 < notAvailableClientIds.length) {
                     refleshedSpaceCount++;
+
+                    if (allClients.length === 0) {
+                        deactivedSpaceCount++;
+                    }
+                }
+
+                if (0 < allClients.length) {
+                    spaceIdentifierManager.activate(spaceIdentifierHash);
                 }
             });
 
             if (0 < refleshedSpaceCount) {
-                systemLogger.info(`Refleshes clients. refleshed count: ${refleshedSpaceCount}`);
+                systemLogger.info(`Refleshes clients. refleshed space(s) : ${refleshedSpaceCount}`);
+            }
+
+            if (0 < deactivedSpaceCount) {
+                systemLogger.info(`${deactivedSpaceCount} space(s) become(s) inactive.`);
             }
 
             setTimeout(manage, CLIENT_HEALTH_CHECK_INTERVAL_MILLIS);
