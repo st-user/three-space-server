@@ -128,7 +128,9 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                         }));
                     }
                 });
-                refleshedSpaceCount++;
+                if (0 < notAvailableClientIds.length) {
+                    refleshedSpaceCount++;
+                }
             });
 
             if (0 < refleshedSpaceCount) {
