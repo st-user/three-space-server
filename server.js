@@ -8,6 +8,7 @@ const jwt = require('express-jwt');
 const jwtAuthz = require('express-jwt-authz');
 const jwksRsa = require('jwks-rsa');
 const { v4: uuidv4 } = require('uuid');
+const { join } = require('path');
 
 const { postRouting, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger } = require('./components/Logger.js');
@@ -33,6 +34,8 @@ app.use(
         },
     })
 );
+app.use('/', express.static(join(__dirname, 'dist')));
+
 
 const httpServer = app.listen(PORT, () => {
     systemLogger.info(`Start listening on ${PORT}`);
@@ -56,17 +59,6 @@ app.get('/auth_config', (req, res) => {
         clientId: process.env.AUTH0_CLIENT_ID,
         audience: process.env.AUTH0_AUDIENCE
     });
-});
-
-app.use((err, req, res, next) => {
-
-    if (err.name === 'UnauthorizedError') {
-        return res.status(401).send({
-            msg: 'Invalid token'
-        });
-    }
-
-    next(err, req, res);
 });
 
 const checkJwt = jwt({
@@ -101,7 +93,16 @@ app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
     });
 });
 
+app.use((err, req, res, next) => {
 
+    if (err.name === 'UnauthorizedError') {
+        return res.status(401).send({
+            msg: 'Invalid token'
+        });
+    }
+
+    next(err, req, res);
+});
 
 /* websocket */
 // https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server

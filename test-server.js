@@ -1,10 +1,7 @@
 'use strict';
 
-const { app, express } = require('./server.js');
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 const { hash } = require('./tools/keygen.js');
-
-app.use('/', express.static('./dist'));
 
 const exp = new Date();
 exp.setMonth(exp.getMonth() + 1);
