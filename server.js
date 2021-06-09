@@ -90,7 +90,8 @@ app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
     const spaceIdentifier = uuidv4();
 
     const exp = new Date();
-    exp.setHours(exp.getHours() + 1);
+    const length = parseInt(process.env.SPACE_IDENTIFIER_LIFE_SPAN_HOURS || '3');
+    exp.setHours(exp.getHours() + length);
 
     hash(spaceIdentifier).then(spaceIdentifierHash => {
         spaceIdentifierManager.availableSpaceIdentifierHashes.set(spaceIdentifierHash, {

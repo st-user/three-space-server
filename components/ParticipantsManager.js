@@ -27,7 +27,8 @@ module.exports = class ParticipantsManager {
 
 
         const exp = new Date();
-        exp.setHours(exp.getHours() + 1);
+        const length = parseInt(process.env.CLIENT_INFO_LIFE_SPAN_HOURS || '3');
+        exp.setHours(exp.getHours() + length);
         participantByClientId.set(clientId, {
             clientId: clientId,
             name: name,
