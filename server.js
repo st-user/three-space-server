@@ -1,6 +1,12 @@
 'use strict';
 
-require('dotenv').config();
+const { 
+    NODE_ENV,
+    PORT,
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_AUDIENCE
+} = require('./components/Environment.js');
 
 const express = require('express');
 const helmet = require('helmet');
@@ -15,11 +21,8 @@ const { systemLogger } = require('./components/Logger.js');
 const { hash } = require('./tools/keygen.js');
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
 
-/* Server Port */
-const PORT = process.env.PORT;
-
 /* NODE_ENV */
-systemLogger.info(`NODE_ENV is ${process.env.NODE_ENV}`);
+systemLogger.info(`NODE_ENV is ${NODE_ENV}`);
 
 /* express */
 const app = express();
@@ -29,8 +32,8 @@ app.use(
     helmet.contentSecurityPolicy({
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            'connect-src': [`'self' blob: https://${process.env.AUTH0_DOMAIN}/`],
-            'frame-src': [ `https://${process.env.AUTH0_DOMAIN}/` ]
+            'connect-src': [`'self' blob: https://${AUTH0_DOMAIN}/`],
+            'frame-src': [ `https://${AUTH0_DOMAIN}/` ]
         },
     })
 );
@@ -55,9 +58,9 @@ postRouting.forEach((compoment, path) => {
 
 app.get('/auth_config', (req, res) => {
     res.send({
-        domain: process.env.AUTH0_DOMAIN,
-        clientId: process.env.AUTH0_CLIENT_ID,
-        audience: process.env.AUTH0_AUDIENCE
+        domain: AUTH0_DOMAIN,
+        clientId: AUTH0_CLIENT_ID,
+        audience: AUTH0_AUDIENCE
     });
 });
 
@@ -66,11 +69,11 @@ const checkJwt = jwt({
         cache: true,
         rateLimit: true,
         jwksRequestPerMinute: 5,
-        jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
+        jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
     }),
 
-    audience: process.env.AUTH0_AUDIENCE,
-    issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+    audience: AUTH0_AUDIENCE,
+    issuer: `https://${AUTH0_DOMAIN}/`,
     algorithms: ['RS256']
 });
 
@@ -82,8 +85,7 @@ app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
     const spaceIdentifier = uuidv4();
 
     const exp = new Date();
-    const length = parseInt(process.env.SPACE_IDENTIFIER_LIFE_SPAN_HOURS || '3');
-    exp.setHours(exp.getHours() + length);
+    exp.setHours(exp.getHours() + 3);
 
     hash(spaceIdentifier).then(spaceIdentifierHash => {
         spaceIdentifierManager.availableSpaceIdentifierHashes.set(spaceIdentifierHash, {

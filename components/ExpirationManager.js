@@ -1,6 +1,8 @@
 'use strict';
 
-const CHECK_EXPIRATION_INTERVAL = 1000 * 60;
+const { EXPIRATION_CHECK_INTERVAL_SECONDS } = require('./Environment.js');
+const EXPIRATION_CHECK_INTERVAL_MILLIS = EXPIRATION_CHECK_INTERVAL_SECONDS * 1000;
+
 const { systemLogger } = require('./Logger.js');
 
 module.exports = class ExpirationManager {
@@ -31,8 +33,8 @@ module.exports = class ExpirationManager {
                 );
             }
 
-            setTimeout(check, CHECK_EXPIRATION_INTERVAL);
+            setTimeout(check, EXPIRATION_CHECK_INTERVAL_MILLIS);
         };
-        setTimeout(check, CHECK_EXPIRATION_INTERVAL);
+        setTimeout(check, EXPIRATION_CHECK_INTERVAL_MILLIS);
     }
 };

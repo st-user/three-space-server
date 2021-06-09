@@ -1,7 +1,9 @@
 'use strict';
 
+const { SPACE_IDENTIFIER_HASHES } = require('./components/Environment.js');
+
 const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
-const spaceIdentifierHashes = process.env.SPACE_IDENTIFIER_HASHES.split(',');
+const spaceIdentifierHashes = SPACE_IDENTIFIER_HASHES.split(',');
 
 const exp = new Date();
 exp.setHours(exp.getHours() + 6);

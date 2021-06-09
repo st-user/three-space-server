@@ -1,5 +1,7 @@
 'use strict';
 
+const { STUN_URL, TURN_URL } = require('./components/Environment.js');
+
 const crypto = require('crypto');
 
 const RequestHandler = require('./RequestHandler.js');
@@ -7,8 +9,6 @@ const { systemLogger } = require('./Logger.js');
 const { spaceIdentifierManager, clientTokenManager, participantsManager } = require('./ApplicationComponents.js');
 const { generateTurnCredentials } = require('./TurnCredentialGen.js');
 
-const STUN_URL = process.env.STUN_URL;
-const TURN_URL = process.env.TURN_URL;
 
 module.exports = class ParticipatRequestHandler extends RequestHandler {
 

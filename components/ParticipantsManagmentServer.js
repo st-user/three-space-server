@@ -1,12 +1,18 @@
 'use strict';
 
+const { 
+    CLIENT_HEALTH_CHECK_INTERVAL_SECONDS,
+    CONNECTION_PING_PONG_INTERVAL_SECONDS
+} = require('./Environment.js');
+
+const CLIENT_HEALTH_CHECK_INTERVAL_MILLIS = CLIENT_HEALTH_CHECK_INTERVAL_SECONDS * 1000;
+const CONNECTION_PING_PONG_INTERVAL_MILLIS = CONNECTION_PING_PONG_INTERVAL_SECONDS * 1000;
+
 const WebSocket = require('ws');
 const WebSocketServerWrapper = require('./WebSocketServerWrapper.js');
 const { clientTokenManager, participantsManager, spaceIdentifierManager } = require('./ApplicationComponents.js');
 const { systemLogger } = require('./Logger.js');
 
-const CLIENT_HEALTH_CHECK_INTERVAL_MILLIS = 3000;
-const CONNECTION_PING_PONG_INTERVAL_MILLIS = 10000;
 
 module.exports = class ParticipantsManagmentServer extends WebSocketServerWrapper {
 
