@@ -3,14 +3,12 @@
 const { systemLogger } = require('./Logger.js');
 const { clientTokenManager } = require('./ApplicationComponents.js');
 const fs = require('fs');
-const RequestHandler = require('./RequestHandler.js');
 
-module.exports = class VrmDataRequestHandler extends RequestHandler {
+module.exports = class VrmDataRequestHandler{
 
     filePaths;
 
     constructor(filePaths) {
-        super();
         this.filePaths = filePaths;
     }
 

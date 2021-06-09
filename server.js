@@ -10,16 +10,14 @@ const {
 
 const express = require('express');
 const helmet = require('helmet');
-const jwt = require('express-jwt');
-const jwtAuthz = require('express-jwt-authz');
-const jwksRsa = require('jwks-rsa');
-const { v4: uuidv4 } = require('uuid');
+
 const { join } = require('path');
 
-const { postRouting, websocketServerRouting } = require('./components/ApplicationRoutings.js');
+const { appRouter, websocketServerRouting } = require('./components/ApplicationRoutings.js');
 const { systemLogger } = require('./components/Logger.js');
-const { hash } = require('./tools/keygen.js');
-const { spaceIdentifierManager } = require('./components/ApplicationComponents.js');
+
+const { before } = require('./routers/Global.js');
+const spaceIdentifierGeneratorRouter = require('./routers/api/SpaceIdentifierGeneratorRouter.js');
 
 /* NODE_ENV */
 systemLogger.info(`NODE_ENV is ${NODE_ENV}`);
@@ -45,16 +43,6 @@ const httpServer = app.listen(PORT, () => {
 });
 app.set('trust proxy', 'loopback');
 
-postRouting.forEach((compoment, path) => {
-
-    app.post(path, async (req, res) => {
-
-        await compoment.doHandle(req, res);
-
-    });
-});
-
-/* for endpoint that should be authenticated by auth0 */
 
 app.get('/auth_config', (req, res) => {
     res.send({
@@ -64,42 +52,10 @@ app.get('/auth_config', (req, res) => {
     });
 });
 
-const checkJwt = jwt({
-    secret: jwksRsa.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestPerMinute: 5,
-        jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
-    }),
+app.use(before);
+app.use(appRouter);
+app.use('/api', spaceIdentifierGeneratorRouter);
 
-    audience: AUTH0_AUDIENCE,
-    issuer: `https://${AUTH0_DOMAIN}/`,
-    algorithms: ['RS256']
-});
-
-const checkScopes = jwtAuthz([ 'create:spaceIdentifier' ], {
-    customScopeKey: 'permissions'
-});
-
-app.get('/api/generateSpaceIdentifier', checkJwt, checkScopes, (req, res) => {
-    const spaceIdentifier = uuidv4();
-
-    hash(spaceIdentifier).then(spaceIdentifierHash => {
-        spaceIdentifierManager.setNew(spaceIdentifierHash);
-        res.json({ spaceIdentifier });
-    });
-});
-
-app.use((err, req, res, next) => {
-
-    if (err.name === 'UnauthorizedError') {
-        return res.status(401).send({
-            msg: 'Invalid token'
-        });
-    }
-
-    next(err, req, res);
-});
 
 /* websocket */
 // https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server

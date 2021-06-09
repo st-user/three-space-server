@@ -4,13 +4,12 @@ const { STUN_URL, TURN_URL } = require('./Environment.js');
 
 const crypto = require('crypto');
 
-const RequestHandler = require('./RequestHandler.js');
 const { systemLogger } = require('./Logger.js');
 const { spaceIdentifierManager, clientTokenManager, participantsManager } = require('./ApplicationComponents.js');
 const { generateTurnCredentials } = require('./TurnCredentialGen.js');
 
 
-module.exports = class ParticipatRequestHandler extends RequestHandler {
+module.exports = class ParticipantsRequestHandler {
 
     async handle(req, res) {
 
