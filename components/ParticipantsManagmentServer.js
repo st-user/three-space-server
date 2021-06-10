@@ -135,10 +135,13 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
                 const allClients = participantsManager.getClients(spaceIdentifierHash);
                 sockClients.forEach((client, clientId) => {                   
                     if (client.readyState === WebSocket.OPEN) {
+                        const newTokens = clientTokenManager.resetToken(clientId) || {};
+                        const { pmToken, vrmToken } = newTokens;
                         client.send(JSON.stringify({
                             cmd: 'refleshClients',
                             clientId: clientId,
-                            allClients: allClients
+                            allClients: allClients,
+                            pmToken, vrmToken
                         }));
                     }
                 });
@@ -182,13 +185,14 @@ module.exports = class ParticipantsManagmentServer extends WebSocketServerWrappe
     }
 
     _resetToken(messageObj, ws) {
-        const newToken = clientTokenManager.resetToken(messageObj.clientId, 'pmToken');
-        if (!newToken) {
+        const newTokens = clientTokenManager.resetToken(messageObj.clientId, 'pmToken');
+        if (!newTokens) {
             throw 'Token being reset is undefined.';
         }
+        const { pmToken, vrmToken } = newTokens;
         ws.send(JSON.stringify({
             cmd: 'resetToken',
-            pmToken: newToken
+            pmToken, vrmToken
         }));
     }
 

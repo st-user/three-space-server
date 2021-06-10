@@ -2,5 +2,6 @@ node_modules/
 log/
 .DS_Store
 .vrm
+.vscode
 .env
 dist

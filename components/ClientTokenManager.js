@@ -1,5 +1,5 @@
 'use strict';
-const { CLIENT_TOKEN_LIFE_SPAN_MINUTES } = require('./Environment.js');
+const { CLIENT_TOKEN_LIFE_SPAN_SECONDS } = require('./Environment.js');
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -16,7 +16,7 @@ module.exports = class ClientTokenManager {
         const vrmToken = this._generateToken();
 
         const exp = new Date();
-        exp.setMinutes(exp.getMinutes() + CLIENT_TOKEN_LIFE_SPAN_MINUTES);
+        exp.setSeconds(exp.getSeconds() + CLIENT_TOKEN_LIFE_SPAN_SECONDS);
 
         const tokens = {
             pmToken: pmToken,
@@ -39,14 +39,13 @@ module.exports = class ClientTokenManager {
         return token === inputValue;
     }
 
-    resetToken(clientId, tokenName) {
+    resetToken(clientId) {
         const tokens = this.tokensByClientId.get(clientId);
         if (!tokens) {
             return undefined;
         }
-        const newToken = this._generateToken();
-        tokens[tokenName] = newToken;
-        return newToken;
+        const newTokens = this.generateToken(clientId);
+        return Object.assign(tokens, newTokens);
     }
 
     checkExpiration(now) {

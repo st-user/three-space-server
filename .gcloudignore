@@ -1,6 +1,7 @@
 #!include:.env
 !.vrm/
 !dist/
+.vscode
 .DS_Store
 log
 .git
