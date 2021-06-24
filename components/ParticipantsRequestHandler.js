@@ -1,12 +1,8 @@
 'use strict';
 
-const { STUN_URL, TURN_URL } = require('./Environment.js');
-
-const crypto = require('crypto');
-
 const { systemLogger } = require('./Logger.js');
 const { spaceIdentifierManager, clientTokenManager, participantsManager } = require('./ApplicationComponents.js');
-const { generateTurnCredentials } = require('./TurnCredentialGen.js');
+const { generateICEServerInfo } = require('./TurnCredentialGen.js');
 
 
 module.exports = class ParticipantsRequestHandler {
@@ -41,23 +37,13 @@ module.exports = class ParticipantsRequestHandler {
         );
 
         const tokens = clientTokenManager.generateToken(newClientId);
-        const turnCredentials = generateTurnCredentials(this._generateTempUserId());
+        const iceServerInfo = generateICEServerInfo();
 
         res.json({
             clientId: newClientId,
             theOtherClients: theOtherClients,
             tokens: tokens,
-            iceServerInfo: {
-                stunUrl: STUN_URL,
-                turnUrl: TURN_URL,
-                turnCredentials: turnCredentials
-            }
+            iceServerInfo
         });
-    }
-
-    _generateTempUserId() {
-        const buff = crypto.randomBytes(8);
-        const hex = buff.toString('hex');
-        return hex;
     }
 };

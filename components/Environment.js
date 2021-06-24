@@ -13,9 +13,9 @@ const ENVS = {
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     SPACE_IDENTIFIER_HASHES: process.env.SPACE_IDENTIFIER_HASHES || '',
 
-    TURN_SECRET: process.env.TURN_SECRET,
-    STUN_URL: process.env.STUN_URL,
-    TURN_URL: process.env.TURN_URL,
+    TURN_SECRETS: process.env.TURN_SECRETS,
+    STUN_URLS: process.env.STUN_URLS,
+    TURN_URLS: process.env.TURN_URLS,
     HOURS_TURN_CREDENTIAL_VALID: _parseInt(process.env.HOURS_TURN_CREDENTIAL_VALID, 30),
     
     AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
